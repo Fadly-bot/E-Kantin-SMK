@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { Analytics } from '@vercel/analytics/react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import LandingPage from './components/LandingPage';
@@ -71,6 +71,9 @@ export default function App() {
           <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Memuat Sistem...</p>
         </div>
       </div>
+      <Analytics /> {/* <-- Taruh di sini, satu baris saja */}
+      </div>
+    </BrowserRouter>
     );
   }
 
