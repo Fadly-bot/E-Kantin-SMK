@@ -70,8 +70,7 @@ export default function App() {
           <div className="w-12 h-12 border-4 border-fresh-green border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Memuat Sistem...</p>
         </div>
-      </div>
-      <Analytics /> {/* <-- Taruh di sini, satu baris saja */}
+        <Analytics /> {/* <-- Taruh di sini, satu baris saja */}
       </div>
     </BrowserRouter>
     );
