@@ -1,0 +1,6 @@
+{
+  "name": "Remix: E-Kantin SMK",
+  "description": "Sistem kantin digital modern untuk lingkungan SMK dengan fitur dashboard siswa, absensi guru, dan riwayat transaksi transparan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
