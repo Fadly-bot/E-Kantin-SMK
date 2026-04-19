@@ -5,6 +5,9 @@
 import { Analytics } from '@vercel/analytics/react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+// Pastikan BrowserRouter di-import jika kamu memakainya, tapi di sini kita pakai state 'view'
+// Jika kamu tidak pakai library react-router-dom, abaikan komentar ini.
+
 import LandingPage from './components/LandingPage';
 import JoinPage from './components/JoinPage';
 import LoginPage from './components/LoginPage';
@@ -63,6 +66,7 @@ export default function App() {
     setView('landing');
   };
 
+  // Tampilan saat Loading
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -70,9 +74,7 @@ export default function App() {
           <div className="w-12 h-12 border-4 border-fresh-green border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Memuat Sistem...</p>
         </div>
-        <Analytics /> {/* <-- Taruh di sini, satu baris saja */}
       </div>
-    </BrowserRouter>
     );
   }
 
@@ -148,6 +150,9 @@ export default function App() {
           </Layout>
         )}
       </AnimatePresence>
+
+      {/* Analytics diletakkan satu kali di sini agar memantau seluruh aplikasi */}
+      <Analytics />
     </div>
   );
 }
