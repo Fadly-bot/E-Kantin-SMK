@@ -2,6 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from '@vercel/analytics/react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -153,6 +154,7 @@ export default function App() {
 
       {/* Analytics diletakkan satu kali di sini agar memantau seluruh aplikasi */}
       <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
