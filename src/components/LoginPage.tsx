@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { User, Lock, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
 import { UserRole, User as UserType } from '../types';
+// --- TAMBAHKAN IMPORT SUPABASE DARI CDN ---
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// --- INISIALISASI SUPABASE ---
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface LoginPageProps {
   role: UserRole;
@@ -23,20 +30,23 @@ export default function LoginPage({ role, onSuccess, onBack, onRegister }: Login
     setError('');
 
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
+      // --- LOGIKA BARU: CEK DATA KE SUPABASE ---
+      const { data, error: loginError } = await supabase
+        .from('users') // Memastikan nama tabel adalah 'users'
+        .select('*')
+        .eq('username', username)
+        .eq('password', password) // Pastikan kolom di Supabase tulisannya 'password'
+        .single();
 
-      const data = await response.json();
-      if (response.ok) {
-        onSuccess(data.user, data.token);
+      if (loginError || !data) {
+        setError('Username atau password salah.');
       } else {
-        setError(data.message || 'Login gagal. Silakan coba lagi.');
+        // Berhasil Login!
+        // Kirim data user yang didapat dari Supabase ke fungsi onSuccess
+        onSuccess(data as UserType, 'dummy-session-token');
       }
     } catch (err) {
-      setError('Terjadi kesalahan koneksi.');
+      setError('Terjadi kesalahan koneksi ke server cloud.');
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +73,7 @@ export default function LoginPage({ role, onSuccess, onBack, onRegister }: Login
             <Lock className="text-fresh-green w-8 h-8" />
           </div>
           <h2 className="text-3xl font-extrabold text-deep-blue mb-2">Selamat Datang</h2>
-          <p className="text-slate-500">Masuk sebagai <span className="text-fresh-green font-bold capitalize">{role === 'student' ? 'Client' : 'Seller'}</span></p>
+          <p className="text-slate-500">Masuk sebagai <span className="text-fresh-green font-bold capitalize">{role === 'student' ? 'Siswa' : 'Penjual'}</span></p>
         </div>
 
         {error && (
