@@ -4,7 +4,8 @@ import { User, Lock, ArrowLeft, Loader2, Mail, GraduationCap, Eye, EyeOff } from
 import * as Select from '@radix-ui/react-select';
 import { UserRole, User as UserType } from '../types';
 // --- TAMBAHKAN IMPORT INI ---
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 
 // --- INISIALISASI SUPABASE ---
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
