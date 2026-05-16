@@ -1,160 +1,116 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-import { SpeedInsights } from "@vercel/speed-insights/react";
+import React, { useState } from 'react';
+// Import Vercel Analytics untuk performa SEO
 import { Analytics } from '@vercel/analytics/react';
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-// Pastikan BrowserRouter di-import jika kamu memakainya, tapi di sini kita pakai state 'view'
-// Jika kamu tidak pakai library react-router-dom, abaikan komentar ini.
-
-import LandingPage from './components/LandingPage';
-import JoinPage from './components/JoinPage';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
-import StudentDashboard from './components/StudentDashboard';
-import TeacherDashboard from './components/TeacherDashboard';
-import SellerDashboard from './components/SellerDashboard';
-import TransactionHistory from './components/TransactionHistory';
-import MenuList from './components/MenuList';
-import Layout from './components/Layout';
-import { User, UserRole, View } from './types';
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-  const [view, setView] = useState<View>('landing');
-  const [selectedRole, setSelectedRole] = useState<UserRole>(null);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // State manajemen halaman bawaan proyek E-Kantin kamu
+  const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'register'>('landing');
+  const [selectedRole, setSelectedRole] = useState<'student' | 'seller'>('student');
+  const [userSession, setUserSession] = useState<any>(null);
 
-  useEffect(() => {
-    const restoreSession = async () => {
-      if (token) {
-        try {
-          const response = await fetch('/api/me', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData);
-            setView('dashboard');
-          } else {
-            localStorage.removeItem('token');
-            setToken(null);
-          }
-        } catch (error) {
-          console.error('Session restoration error:', error);
-        }
-      }
-      setIsLoading(false);
-    };
-    restoreSession();
-  }, [token]);
-
-  const handleLoginSuccess = (userData: User, userToken: string) => {
-    localStorage.setItem('token', userToken);
-    setToken(userToken);
-    setUser(userData);
-    setView('dashboard');
+  const handleLoginSuccess = (user: any, token: string) => {
+    setUserSession({ user, token });
+    // Jika login sukses, arahkan ke dashboard utama nantinya
+    alert(`Selamat datang kembali, ${user.full_name || user.username}!`);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
-    setView('landing');
+  const handleRegisterSuccess = (user: any, token: string) => {
+    setUserSession({ user, token });
+    alert('Pendaftaran akun berhasil! Data Anda sudah tersimpan di Supabase.');
+    setCurrentPage('login');
   };
-
-  // Tampilan saat Loading
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-fresh-green border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Memuat Sistem...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      <AnimatePresence mode="wait">
-        {view === 'landing' && (
-          <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <LandingPage onStart={() => setView('join')} />
-          </motion.div>
-        )}
+    <>
+      {/* 1. HALAMAN UTAMA / LANDING SEBELUM MASUK */}
+      {currentPage === 'landing' && (
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
+          <main className="max-w-2xl w-full bg-white rounded-[2.5rem] shadow-2xl p-12 border border-slate-100">
+            <header className="mb-8">
+              <span className="px-4 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full tracking-wide uppercase">
+                Project E-Kantin SMK
+              </span>
+              <h1 className="text-4xl font-extrabold text-slate-800 mt-4 mb-3">
+                Pesan Makanan & Minuman Tanpa Antre
+              </h1>
+              <p className="text-slate-500 max-w-md mx-auto text-sm">
+                Aplikasi layanan kantin digital sekolah modern untuk kemudahan transaksi siswa dan pengelolaan toko penjual.
+              </p>
+            </header>
 
-        {view === 'join' && (
-          <motion.div key="join" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }}>
-            <JoinPage 
-              onSelectRole={(role) => {
-                setSelectedRole(role);
-                setView('login');
-              }} 
-              onRegisterRole={(role) => {
-                setSelectedRole(role);
-                setView('register');
-              }}
-              onBack={() => setView('landing')}
-            />
-          </motion.div>
-        )}
+            {/* Kotak Pilihan Peran Masuk */}
+            <section className="grid grid-cols-2 gap-4 mb-8">
+              <button
+                onClick={() => setSelectedRole('student')}
+                className={`p-5 rounded-2xl border-2 text-left transition-all ${
+                  selectedRole === 'student'
+                    ? 'border-emerald-500 bg-emerald-50/30'
+                    : 'border-slate-100 bg-slate-50 hover:bg-slate-100/70'
+                }`}
+              >
+                <div className={`w-3 h-3 rounded-full mb-3 ${selectedRole === 'student' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                <h2 className="font-bold text-slate-800 text-base">Saya Siswa / Guru</h2>
+                <p className="text-xs text-slate-400 mt-1">Belanja menu favorit dari kelas</p>
+              </button>
 
-        {view === 'login' && (
-          <motion.div key="login" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <LoginPage 
-              role={selectedRole}
-              onSuccess={handleLoginSuccess}
-              onBack={() => setView('join')}
-              onRegister={() => setView('register')}
-            />
-          </motion.div>
-        )}
+              <button
+                onClick={() => setSelectedRole('seller')}
+                className={`p-5 rounded-2xl border-2 text-left transition-all ${
+                  selectedRole === 'seller'
+                    ? 'border-emerald-500 bg-emerald-50/30'
+                    : 'border-slate-100 bg-slate-50 hover:bg-slate-100/70'
+                }`}
+              >
+                <div className={`w-3 h-3 rounded-full mb-3 ${selectedRole === 'seller' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                <h2 className="font-bold text-slate-800 text-base">Saya Penjual Kantin</h2>
+                <p className="text-xs text-slate-400 mt-1">Kelola menu toko & pantau omset</p>
+              </button>
+            </section>
 
-        {view === 'register' && (
-          <motion.div key="register" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <RegisterPage 
-              role={selectedRole}
-              onSuccess={handleLoginSuccess}
-              onBack={() => setView('login')}
-            />
-          </motion.div>
-        )}
+            <div className="space-y-3">
+              <button
+                onClick={() => setCurrentPage('login')}
+                className="w-full bg-slate-800 text-white py-4 rounded-xl font-bold text-base hover:bg-slate-700 transition-all shadow-md"
+              >
+                Masuk ke Aplikasi
+              </button>
+              
+              <button
+                onClick={() => setCurrentPage('register')}
+                className="w-full bg-slate-50 text-emerald-700 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50/50 border border-emerald-100 transition-all"
+              >
+                Belum punya akun? Daftar Sekarang
+              </button>
+            </div>
+          </main>
+        </div>
+      )}
 
-        {(view === 'dashboard' || view === 'history' || view === 'menu-list' || view === 'manage-menu') && user && (
-          <Layout 
-            user={user}
-            currentView={view} 
-            setView={setView} 
-            onLogout={handleLogout}
-            onSelectId={setSelectedId}
-          >
-            <motion.div
-              key={view}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
-            >
-              {(view === 'dashboard' && (user.role === 'student' || user.role === 'staff')) && <StudentDashboard user={user} />}
-              {view === 'dashboard' && user.role === 'teacher' && <TeacherDashboard user={user} />}
-              {view === 'dashboard' && user.role === 'seller' && <SellerDashboard user={user} view={view} selectedProductId={selectedId} onClearSelection={() => setSelectedId(null)} />}
-              {view === 'manage-menu' && user.role === 'seller' && <SellerDashboard user={user} view={view} selectedProductId={selectedId} onClearSelection={() => setSelectedId(null)} />}
-              {view === 'history' && <TransactionHistory user={user} />}
-              {view === 'menu-list' && <MenuList user={user} selectedProductId={selectedId} onClearSelection={() => setSelectedId(null)} />}
-            </motion.div>
-          </Layout>
-        )}
-      </AnimatePresence>
+      {/* 2. COMPONENT HALAMAN LOGIN */}
+      {currentPage === 'login' && (
+        <LoginPage
+          role={selectedRole}
+          onSuccess={handleLoginSuccess}
+          onBack={() => setCurrentPage('landing')}
+          onRegister={() => setCurrentPage('register')}
+        />
+      )}
 
-      {/* Analytics diletakkan satu kali di sini agar memantau seluruh aplikasi */}
+      {/* 3. COMPONENT HALAMAN DAFTAR / REGISTRASI */}
+      {currentPage === 'register' && (
+        <RegisterPage
+          role={selectedRole}
+          onSuccess={handleRegisterSuccess}
+          onBack={() => setCurrentPage('landing')}
+        />
+      )}
+
+      {/* SUNTIKAN TRACKING SEO VERCEL (Diproses Otomatis di Latar Belakang) */}
       <Analytics />
       <SpeedInsights />
-    </div>
+    </>
   );
 }
